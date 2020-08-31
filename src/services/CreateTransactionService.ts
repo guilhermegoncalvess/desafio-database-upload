@@ -1,5 +1,5 @@
-// import AppError from '../errors/AppError';
 import { getCustomRepository } from 'typeorm';
+import AppError from '../errors/AppError';
 // import { uuid } from 'uuid';
 import Transaction from '../models/Transaction';
 
@@ -26,6 +26,13 @@ class CreateTransactionService {
     const findCategoryExisting = await categoriesRepository.existingCategory(
       category,
     );
+
+    const balance = await transactionsRepository.getBalance();
+
+    if (type === 'outcome' && balance.total < value) {
+      throw new AppError('Insufficient total', 400);
+    }
+
     let category_id: string;
 
     if (findCategoryExisting) {
